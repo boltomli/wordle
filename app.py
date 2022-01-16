@@ -54,18 +54,20 @@ st.markdown('Help solve [Wordle](https://www.powerlanguage.co.uk/wordle/) alike 
 
 word_len = st.number_input(key='word_len', label='Input word length', min_value=1, max_value=10, value=5)
 
+candidates = wordle[str(word_len)]
+valid = []
+
 known = st.text_input(key='known_letters', label='Input known letters', max_chars=word_len).lower()
 query = rearrange(clean(known))
 consist_len = len(query)
-
-known_not = st.text_input(key='known_letters_not',
-                          label='Input letters that do not appear', max_chars=len(alphabet)-consist_len).lower()
-
-candidates = wordle[str(word_len)]
-valid = []
 for w in candidates:
-    if sub(query, w) and not consist(query, known_not):
+    if sub(query, w):
         valid += candidates[w]
+
+known_not = rearrange(clean(st.text_input(key='known_letters_not', label='Input letters that do not appear', max_chars=len(alphabet)-consist_len).lower()))
+if known_not:
+    valid = [w for w in valid if not consist(w, known_not)]
+
 for i in range(word_len):
     pos = clean(st.text_input(label=f'Letter at {i + 1} should be', max_chars=1).lower())
     if pos and pos in query:
@@ -73,6 +75,7 @@ for i in range(word_len):
     pos_not = clean(st.text_input(label=f'Must not appear at {i+1}', max_chars=consist_len).lower())
     if pos_not and consist(pos_not, query):
         valid = filter_pos_not(valid, pos_not, i)
+
 if known:
     if not valid:
         st.warning('Found nothing against the query')
