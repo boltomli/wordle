@@ -7,10 +7,8 @@ import streamlit as st
 
 
 @st.cache
-def get_word(candidates, game) -> str:
-    if not game:
-        return ''
-    random.seed(datetime.utcnow().timestamp())
+def get_word(candidates, game, today) -> str:
+    random.seed(f'{today}_{game}')
     target_value = random.choice(candidates)
     invalid = True
     while invalid:
@@ -56,7 +54,7 @@ candidates = st.session_state['candidates'][word_len]
 
 if 'game' not in st.session_state.keys():
     st.session_state.game = 1
-st.session_state.target = get_word(candidates, st.session_state.game)
+st.session_state.target = get_word(candidates, st.session_state.game, datetime.today().date().strftime('%Y%m%d'))
 
 if 'history' not in st.session_state.keys():
     st.session_state.history = {st.session_state.target: {}}
@@ -65,7 +63,7 @@ if st.button('Another word'):
     st.write('You can try a different word, but the whole batch will start over once the webpage is refreshed. It will refresh each day.')
     while st.session_state.target in st.session_state.history.keys():
         st.session_state.game = st.session_state.game + 1
-        st.session_state.target = get_word(candidates, st.session_state.game)
+        st.session_state.target = get_word(candidates, st.session_state.game, datetime.today().date().strftime('%Y%m%d'))
 
 if st.session_state.target not in st.session_state.history.keys():
     st.session_state.history[st.session_state.target] = {}
